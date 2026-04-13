@@ -1,0 +1,118 @@
+{
+  "name": "vproc-assembly",
+  "displayName": "マイクロプロセッサ",
+  "description": "VS Codeでアセンブリ言語のプログラミングをサポートする拡張機能（埼玉大学 電気電子物理工学実験Ⅲ「マイクロプロセッサ」向け）",
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/su-ito-lab/microprocessor-vscode-extension.git"
+  },
+  "icon": "image/icon.png",
+  "version": "1.2.0",
+  "publisher": "Ito-Lab",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:vprocasm",
+    "onLanguage:vprocops"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "vprocasm",
+        "aliases": [
+          "Virtual Processor Assembly",
+          "vprocasm"
+        ],
+        "extensions": [
+          ".asm"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "vprocops",
+        "aliases": [
+          "Virtual Processor Options",
+          "vprocops"
+        ],
+        "extensions": [
+          ".ops"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "vprocasm",
+        "path": "./vprocasm.code-snippets.json"
+      }
+    ],
+    "semanticTokenTypes": [
+      {
+        "id": "mnemonic",
+        "superType": "function",
+        "description": "Assembly instruction mnemonic"
+      },
+      {
+        "id": "label",
+        "superType": "parameter",
+        "description": "Label definition and reference"
+      },
+      {
+        "id": "comment",
+        "superType": "comment",
+        "description": "Comment in assembly line"
+      },
+      {
+        "id": "register",
+        "superType": "enumMember",
+        "description": "register in assembly line"
+      },
+      {
+        "id": "number",
+        "superType": "macro",
+        "description": "number in assembly line"
+      },
+      {
+        "id": "import",
+        "superType": "keyword",
+        "description": "import in assembly line"
+      },
+      {
+        "id": "string",
+        "superType": "keyword",
+        "description": "string in assembly line"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "vprocasm",
+        "scopeName": "source.vprocasm",
+        "path": "./syntaxes/vprocasm.tmLanguage.json"
+      },
+      {
+        "language": "vprocops",
+        "scopeName": "source.vprocops",
+        "path": "./syntaxes/vprocops.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/vscode": "^1.60.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "iconv-lite": "^0.7.0"
+  }
+}

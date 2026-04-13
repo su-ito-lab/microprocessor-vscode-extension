@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Virtual Processor Assembly",
+  "scopeName": "source.vprocasm",
+
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" }      
+  ],
+
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.vprocasm",
+          "match": "#.*$"
+        }
+      ]
+    },
+
+    "strings": {
+      "patterns": [
+        {
+          "name": "string",
+          "match": "'[^']*'"
+        }
+      ]
+    }
+  }
+  
+}

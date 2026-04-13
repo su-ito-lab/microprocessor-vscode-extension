@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Virtual Processor Ops",
+  "scopeName": "source.vprocops",
+
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#registers" },
+    { "include": "#frag" },
+    { "include": "#label" },
+    { "include": "#number" },
+    { "include": "#others" }
+  ],
+
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.vprocops",
+          "match": "#.*$"
+        }
+      ]
+    },
+
+    
+    "others": {
+      "patterns": [
+        {
+          "name": "keyword.control",
+          "match": "\\b(nbyte|opcode|alias)\\b"
+        }
+      ]
+    }
+  }
+}

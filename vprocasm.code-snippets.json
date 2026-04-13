@@ -1,0 +1,25 @@
+{
+  "Register AC": {
+    "prefix": "AC",
+    "body": ["AC"],
+    "description": "レジスタ AC"
+  },
+
+  "Register WA": {
+    "prefix": "WA",
+    "body": ["WA"],
+    "description": "レジスタ WA"
+  },
+
+  "Register B": {
+    "prefix": "B",
+    "body": ["B"],
+    "description": "レジスタ B"
+  },
+
+  "Register X": {
+    "prefix": "X",
+    "body": ["X"],
+    "description": "レジスタ X"
+  }
+}

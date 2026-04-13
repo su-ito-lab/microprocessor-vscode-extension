@@ -1,0 +1,28 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./out",
+
+    // Environment Settings
+    /* 実行環境（VSCodeはNode.js上で動く） */
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "types": ["node", "vscode"],
+
+    /* 型チェック・品質 */
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* デバッグサポート */
+    "sourceMap": true,
+
+    /* import構文などを素直に解釈 */
+    "esModuleInterop": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", ".vscode-test"]
+}
