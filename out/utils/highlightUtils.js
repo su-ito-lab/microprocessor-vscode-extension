@@ -12,15 +12,14 @@ function highlightLine(raw_text, line, builder, labelRegex, mnemonicRegex, PseRe
     PseRegex.lastIndex = 0;
     regRegex.lastIndex = 0;
     commentRegex.lastIndex = 0;
-    // インポートチェック
-    const importMatch = raw_text.match(/^#import\b/);
-    if (importMatch) {
-        // ---- #import を push ----
-        // console.log('importMatch');
-        const importStart = raw_text.indexOf("#import");
+    // パス指定ディレクティブをチェック
+    const pathDirectiveMatch = raw_text.match(/^#(?:import|exe)\b/);
+    if (pathDirectiveMatch) {
+        const directive = pathDirectiveMatch[0];
+        const directiveStart = pathDirectiveMatch.index ?? 0;
         tokens.push({
-            start: importStart,
-            length: 7, // "#import".length
+            start: directiveStart,
+            length: directive.length,
             type: 5,
             mod: 0
         });

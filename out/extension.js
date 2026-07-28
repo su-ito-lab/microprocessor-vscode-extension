@@ -46,10 +46,35 @@ const asmHoverProvider_1 = require("./providers/asmHoverProvider");
 const opsHoverProvider_1 = require("./providers/opsHoverProvider");
 const importLoader_1 = require("./utils/importLoader");
 const dependencyMap_1 = require("./utils/dependencyMap");
+const exeLauncher_1 = require("./utils/exeLauncher");
 function activate(context) {
     console.log('[VProcAsm] Activated');
     // ===== ASM Diagnostics Collection =====
     const asmDiagnostics = (0, diagnosticProvider_1.Diagnostics)(context);
+    // ===== EXE Diagnostics Collection =====
+    const exeDiagnostics = vscode.languages.createDiagnosticCollection('vprocExe');
+    context.subscriptions.push(exeDiagnostics);
+    const activeDocument = vscode.window.activeTextEditor?.document;
+    if (activeDocument?.languageId === 'vprocasm') {
+        (0, exeLauncher_1.updateExeDiagnostics)(activeDocument, exeDiagnostics);
+    }
+    context.subscriptions.push(vscode.commands.registerCommand('vprocAssembly.runExe', async () => {
+        const document = vscode.window.activeTextEditor?.document;
+        if (!document || document.languageId !== 'vprocasm') {
+            vscode.window.showErrorMessage('ASM ファイルを開いてください。');
+            return;
+        }
+        try {
+            const opsFilePath = (0, importLoader_1.getOpsPathForAsmDocument)(document);
+            await (0, exeLauncher_1.launchExeForAsmDocument)(document, context.extensionPath, opsFilePath);
+        }
+        catch (error) {
+            const message = error instanceof Error
+                ? error.message
+                : 'WinELC1Sim.exeの起動に失敗しました。';
+            vscode.window.showErrorMessage(message);
+        }
+    }));
     // ===== OPS Diagnostics Collection =====
     exports.opsDiagnosticCollection = vscode.languages.createDiagnosticCollection('vprocOps');
     context.subscriptions.push(exports.opsDiagnosticCollection);
@@ -58,6 +83,7 @@ function activate(context) {
         if (doc.languageId === "vprocasm") {
             (0, importLoader_1.loadOpsForAsmDocument)(doc);
             (0, diagnosticProvider_1.updateDiagnostics)(doc, asmDiagnostics);
+            (0, exeLauncher_1.updateExeDiagnostics)(doc, exeDiagnostics);
         }
     });
     // ==== asm編集時も import 解析・依存登録 + opsロード + エラー検知 ====
@@ -65,6 +91,7 @@ function activate(context) {
         if (e.document.languageId === 'vprocasm') {
             (0, importLoader_1.loadOpsForAsmDocument)(e.document);
             (0, diagnosticProvider_1.updateDiagnostics)(e.document, asmDiagnostics);
+            (0, exeLauncher_1.updateExeDiagnostics)(e.document, exeDiagnostics);
         }
     });
     // ==== asm 保存時も import 解析 + エラー検知 ====
@@ -72,6 +99,7 @@ function activate(context) {
         if (doc.languageId === "vprocasm") {
             (0, importLoader_1.loadOpsForAsmDocument)(doc);
             (0, diagnosticProvider_1.updateDiagnostics)(doc, asmDiagnostics);
+            (0, exeLauncher_1.updateExeDiagnostics)(doc, exeDiagnostics);
         }
     });
     // ==== エディタ切替時も import 解析 + エラー検知 ====
@@ -80,6 +108,7 @@ function activate(context) {
         if (doc?.languageId === "vprocasm") {
             (0, importLoader_1.loadOpsForAsmDocument)(doc);
             (0, diagnosticProvider_1.updateDiagnostics)(doc, asmDiagnostics);
+            (0, exeLauncher_1.updateExeDiagnostics)(doc, exeDiagnostics);
         }
     });
     vscode.workspace.onDidOpenTextDocument(doc => {

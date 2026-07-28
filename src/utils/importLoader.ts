@@ -17,23 +17,33 @@ export function findImportOpsInAsm(document: vscode.TextDocument): string | null
   return null;
 }
 
+export function getOpsPathForAsmDocument(
+  document: vscode.TextDocument
+): string | null {
+  const opsFile = findImportOpsInAsm(document);
+  if (!opsFile) {
+    return null;
+  }
+
+  const asmDir = path.dirname(document.uri.fsPath);
+  const absoluteOpsPath = path.isAbsolute(opsFile)
+    ? opsFile
+    : path.resolve(asmDir, opsFile);
+
+  console.log('[VProcAsm] Resolved ops path:', absoluteOpsPath);
+  return absoluteOpsPath;
+}
+
 export async function loadOpsForAsmDocument(
   document: vscode.TextDocument
 ) {
     if (document.languageId !== 'vprocasm') return;
 
-    const opsFile = findImportOpsInAsm(document);
-    if (!opsFile) {
+    const absoluteOpsPath = getOpsPathForAsmDocument(document);
+    if (!absoluteOpsPath) {
         clearCachedInstructions();
         return;
     }
-
-    const asmDir = path.dirname(document.uri.fsPath);
-
-    // ★ 絶対パスならそのまま、相対パスなら resolve
-    const absoluteOpsPath = path.isAbsolute(opsFile)
-        ? opsFile
-        : path.resolve(asmDir, opsFile);
 
     const asmPath = document.uri.fsPath;
 

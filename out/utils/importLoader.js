@@ -34,6 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findImportOpsInAsm = findImportOpsInAsm;
+exports.getOpsPathForAsmDocument = getOpsPathForAsmDocument;
 exports.loadOpsForAsmDocument = loadOpsForAsmDocument;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
@@ -51,19 +52,26 @@ function findImportOpsInAsm(document) {
     // console.log("[VProcAsm] not import ops");
     return null;
 }
-async function loadOpsForAsmDocument(document) {
-    if (document.languageId !== 'vprocasm')
-        return;
+function getOpsPathForAsmDocument(document) {
     const opsFile = findImportOpsInAsm(document);
     if (!opsFile) {
-        (0, opsLoader_1.clearCachedInstructions)();
-        return;
+        return null;
     }
     const asmDir = path.dirname(document.uri.fsPath);
-    // ★ 絶対パスならそのまま、相対パスなら resolve
     const absoluteOpsPath = path.isAbsolute(opsFile)
         ? opsFile
         : path.resolve(asmDir, opsFile);
+    console.log('[VProcAsm] Resolved ops path:', absoluteOpsPath);
+    return absoluteOpsPath;
+}
+async function loadOpsForAsmDocument(document) {
+    if (document.languageId !== 'vprocasm')
+        return;
+    const absoluteOpsPath = getOpsPathForAsmDocument(document);
+    if (!absoluteOpsPath) {
+        (0, opsLoader_1.clearCachedInstructions)();
+        return;
+    }
     const asmPath = document.uri.fsPath;
     // ★ 依存関係を記録（ops → asm）
     (0, dependencyMap_1.registerDependency)(absoluteOpsPath, asmPath);

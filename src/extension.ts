@@ -7,8 +7,9 @@ import { VProcDefinitionProvider } from './providers/DefinitionProvider';
 import { analyzeOpsFile } from './providers/opsDiagnostics';
 import { asmHoverProvider } from './providers/asmHoverProvider';
 import { opsHoverProvider } from './providers/opsHoverProvider';
-import { loadOpsForAsmDocument } from './utils/importLoader';
+import { getOpsPathForAsmDocument, loadOpsForAsmDocument } from './utils/importLoader';
 import { getDependentAsmFiles } from './utils/dependencyMap';
+import { launchExeForAsmDocument, updateExeDiagnostics } from './utils/exeLauncher';
 // import { OpCompletionProvider } from './providers/CompletionProvider'; 
 
 export let opsDiagnosticCollection: vscode.DiagnosticCollection;
@@ -18,6 +19,39 @@ export function activate(context: vscode.ExtensionContext) {
 
   // ===== ASM Diagnostics Collection =====
   const asmDiagnostics = Diagnostics(context);
+
+  // ===== EXE Diagnostics Collection =====
+  const exeDiagnostics = vscode.languages.createDiagnosticCollection('vprocExe');
+  context.subscriptions.push(exeDiagnostics);
+
+  const activeDocument = vscode.window.activeTextEditor?.document;
+  if (activeDocument?.languageId === 'vprocasm') {
+    updateExeDiagnostics(activeDocument, exeDiagnostics);
+  }
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vprocAssembly.runExe', async () => {
+      const document = vscode.window.activeTextEditor?.document;
+      if (!document || document.languageId !== 'vprocasm') {
+        vscode.window.showErrorMessage('ASM ファイルを開いてください。');
+        return;
+      }
+
+      try {
+        const opsFilePath = getOpsPathForAsmDocument(document);
+        await launchExeForAsmDocument(
+          document,
+          context.extensionPath,
+          opsFilePath
+        );
+      } catch (error) {
+        const message = error instanceof Error
+          ? error.message
+          : 'WinELC1Sim.exeの起動に失敗しました。';
+        vscode.window.showErrorMessage(message);
+      }
+    })
+  );
 
   // ===== OPS Diagnostics Collection =====
   opsDiagnosticCollection = vscode.languages.createDiagnosticCollection('vprocOps');
@@ -29,6 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (doc.languageId === "vprocasm") {
       loadOpsForAsmDocument(doc);
       updateDiagnostics(doc, asmDiagnostics);
+      updateExeDiagnostics(doc, exeDiagnostics);
     }
   });
 
@@ -37,6 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (e.document.languageId === 'vprocasm') {
         loadOpsForAsmDocument(e.document);
         updateDiagnostics(e.document, asmDiagnostics);
+        updateExeDiagnostics(e.document, exeDiagnostics);
       }
   });
 
@@ -46,6 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (doc.languageId === "vprocasm") {
       loadOpsForAsmDocument(doc);
       updateDiagnostics(doc, asmDiagnostics);
+      updateExeDiagnostics(doc, exeDiagnostics);
     }
   });
 
@@ -57,6 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (doc?.languageId === "vprocasm") {
       loadOpsForAsmDocument(doc);
       updateDiagnostics(doc, asmDiagnostics);
+      updateExeDiagnostics(doc, exeDiagnostics);
     }
   });
 
