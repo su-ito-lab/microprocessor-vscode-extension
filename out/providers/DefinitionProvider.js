@@ -35,17 +35,36 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VProcDefinitionProvider = void 0;
 const vscode = __importStar(require("vscode"));
+const path = __importStar(require("path"));
 const opsLoader_1 = require("../utils/opsLoader");
 const normalizeUtils_1 = require("../utils/normalizeUtils");
 const labelUtils_1 = require("../utils/labelUtils");
 class VProcDefinitionProvider {
     provideDefinition(document, position) {
+        const rawLine = document.lineAt(position.line).text;
+        const importMatch = rawLine.match(/^(\s*#import\s+)(["'])(.+\.ops)\2\s*$/i);
+        if (importMatch) {
+            const importPath = importMatch[3];
+            const pathStart = importMatch[1].length + 1;
+            const pathEnd = pathStart + importPath.length;
+            if (position.character >= pathStart && position.character < pathEnd) {
+                const opsPath = path.isAbsolute(importPath)
+                    ? importPath
+                    : path.resolve(path.dirname(document.uri.fsPath), importPath);
+                const targetPosition = new vscode.Position(0, 0);
+                return [{
+                        originSelectionRange: new vscode.Range(position.line, pathStart, position.line, pathEnd),
+                        targetUri: vscode.Uri.file(opsPath),
+                        targetRange: new vscode.Range(targetPosition, targetPosition),
+                        targetSelectionRange: new vscode.Range(targetPosition, targetPosition)
+                    }];
+            }
+        }
         const wordRange = document.getWordRangeAtPosition(position);
         if (!wordRange)
             return;
         const clickedWord = document.getText(wordRange);
         // クリックされた行の生テキスト
-        const rawLine = document.lineAt(position.line).text;
         const normalized = (0, normalizeUtils_1.normalizeLineForAnalysis)(rawLine);
         const mnemonic = normalized.trim().split(/\s+/)[0];
         if (clickedWord === mnemonic) {
