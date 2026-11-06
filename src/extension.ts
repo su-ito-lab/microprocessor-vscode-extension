@@ -14,6 +14,31 @@ import { launchExeForAsmDocument, updateExeDiagnostics } from './utils/exeLaunch
 
 export let opsDiagnosticCollection: vscode.DiagnosticCollection;
 
+async function saveSimulatorInputDocuments(
+  asmDocument: vscode.TextDocument
+): Promise<string | null> {
+  if (asmDocument.isDirty && !await asmDocument.save()) {
+    throw new Error('アセンブリファイルを保存できませんでした。');
+  }
+
+  const opsFilePath = getOpsPathForAsmDocument(asmDocument);
+  if (!opsFilePath) {
+    return null;
+  }
+
+  const normalizedOpsPath = path.resolve(opsFilePath).toLowerCase();
+  const opsDocument = vscode.workspace.textDocuments.find(document =>
+    document.uri.scheme === 'file'
+    && path.resolve(document.uri.fsPath).toLowerCase() === normalizedOpsPath
+  );
+
+  if (opsDocument?.isDirty && !await opsDocument.save()) {
+    throw new Error('命令定義ファイルを保存できませんでした。');
+  }
+
+  return opsFilePath;
+}
+
 export function activate(context: vscode.ExtensionContext) {
   console.log('[VProcAsm] Activated');
 
@@ -38,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       try {
-        const opsFilePath = getOpsPathForAsmDocument(document);
+        const opsFilePath = await saveSimulatorInputDocuments(document);
         await launchExeForAsmDocument(
           document,
           context.extensionPath,

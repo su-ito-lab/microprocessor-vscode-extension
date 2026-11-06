@@ -37,6 +37,7 @@ exports.opsDiagnosticCollection = void 0;
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
+const path = __importStar(require("path"));
 const opsLoader_1 = require("./utils/opsLoader");
 const semanticProvider_1 = require("./providers/semanticProvider");
 const diagnosticProvider_1 = require("./providers/diagnosticProvider");
@@ -47,6 +48,22 @@ const opsHoverProvider_1 = require("./providers/opsHoverProvider");
 const importLoader_1 = require("./utils/importLoader");
 const dependencyMap_1 = require("./utils/dependencyMap");
 const exeLauncher_1 = require("./utils/exeLauncher");
+async function saveSimulatorInputDocuments(asmDocument) {
+    if (asmDocument.isDirty && !await asmDocument.save()) {
+        throw new Error('アセンブリファイルを保存できませんでした。');
+    }
+    const opsFilePath = (0, importLoader_1.getOpsPathForAsmDocument)(asmDocument);
+    if (!opsFilePath) {
+        return null;
+    }
+    const normalizedOpsPath = path.resolve(opsFilePath).toLowerCase();
+    const opsDocument = vscode.workspace.textDocuments.find(document => document.uri.scheme === 'file'
+        && path.resolve(document.uri.fsPath).toLowerCase() === normalizedOpsPath);
+    if (opsDocument?.isDirty && !await opsDocument.save()) {
+        throw new Error('命令定義ファイルを保存できませんでした。');
+    }
+    return opsFilePath;
+}
 function activate(context) {
     console.log('[VProcAsm] Activated');
     // ===== ASM Diagnostics Collection =====
@@ -65,7 +82,7 @@ function activate(context) {
             return;
         }
         try {
-            const opsFilePath = (0, importLoader_1.getOpsPathForAsmDocument)(document);
+            const opsFilePath = await saveSimulatorInputDocuments(document);
             await (0, exeLauncher_1.launchExeForAsmDocument)(document, context.extensionPath, opsFilePath);
         }
         catch (error) {
