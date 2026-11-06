@@ -2,12 +2,12 @@
   "name": "vproc-assembly",
   "displayName": "マイクロプロセッサ",
   "description": "VS Codeでアセンブリ言語のプログラミングをサポートする拡張機能（埼玉大学 電気電子物理工学実験Ⅲ「マイクロプロセッサ」向け）",
-    "repository": {
+  "repository": {
     "type": "git",
     "url": "https://github.com/su-ito-lab/microprocessor-vscode-extension.git"
   },
   "icon": "image/icon.png",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "publisher": "su-ito-lab",
   "engines": {
     "vscode": "^1.60.0"
