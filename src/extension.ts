@@ -10,7 +10,7 @@ import { opsHoverProvider } from './providers/opsHoverProvider';
 import { getOpsPathForAsmDocument, loadOpsForAsmDocument } from './utils/importLoader';
 import { getDependentAsmFiles } from './utils/dependencyMap';
 import { launchExeForAsmDocument, updateExeDiagnostics } from './utils/exeLauncher';
-// import { OpCompletionProvider } from './providers/CompletionProvider'; 
+import { LabelCompletionProvider } from './providers/CompletionProvider';
 
 export let opsDiagnosticCollection: vscode.DiagnosticCollection;
 
@@ -190,6 +190,15 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      { language: 'vprocasm' },
+      new LabelCompletionProvider(),
+      ' ',
+      ','
+    )
+  );
+
   
 
 
@@ -197,11 +206,3 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
-
- // --- 補完 CompletionProvider を登録
-  // const CompletionProvider = vscode.languages.registerCompletionItemProvider(
-  //   { language: 'vprocasm' },
-  //   new OpCompletionProvider(),
-  //   ' ', '\t' // 必要に応じてトリガー文字を増やす
-  // );

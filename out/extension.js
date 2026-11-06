@@ -48,6 +48,7 @@ const opsHoverProvider_1 = require("./providers/opsHoverProvider");
 const importLoader_1 = require("./utils/importLoader");
 const dependencyMap_1 = require("./utils/dependencyMap");
 const exeLauncher_1 = require("./utils/exeLauncher");
+const CompletionProvider_1 = require("./providers/CompletionProvider");
 async function saveSimulatorInputDocuments(asmDocument) {
     if (asmDocument.isDirty && !await asmDocument.save()) {
         throw new Error('アセンブリファイルを保存できませんでした。');
@@ -167,12 +168,7 @@ function activate(context) {
     context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'vprocasm' }, new asmHoverProvider_1.asmHoverProvider()));
     // ops 用 hover
     context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'vprocops' }, new opsHoverProvider_1.opsHoverProvider()));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'vprocasm' }, new CompletionProvider_1.LabelCompletionProvider(), ' ', ','));
 }
 function deactivate() { }
-// --- 補完 CompletionProvider を登録
-// const CompletionProvider = vscode.languages.registerCompletionItemProvider(
-//   { language: 'vprocasm' },
-//   new OpCompletionProvider(),
-//   ' ', '\t' // 必要に応じてトリガー文字を増やす
-// );
 //# sourceMappingURL=extension.js.map
